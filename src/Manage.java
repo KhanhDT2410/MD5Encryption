@@ -58,7 +58,12 @@ public class Manage {
         if (accountLogin != null) {
             System.out.println("Welcome, " + accountLogin.getUsername());
             System.out.print("Would you like to change your password now? (Y/N): ");
-            if (in.nextLine().trim().equalsIgnoreCase("Y")) {
+            String response = in.nextLine().trim();
+            while (!response.equalsIgnoreCase("Y") && !response.equalsIgnoreCase("N")) {
+                System.out.print("Invalid input. Please enter Y or N: ");
+                response = in.nextLine().trim();
+            }
+            if (response.equalsIgnoreCase("Y")) {
                 changePassword(accountLogin);
             }
         } else {
@@ -77,27 +82,36 @@ public class Manage {
     }
 
     private static void changePassword(Account accountLogin) {
-        System.out.print("Old password: ");
-        String oldPassword = Validate.checkInputString();
-        if (!MD5Encryption(oldPassword).equalsIgnoreCase(accountLogin.getPassword())) {
-            System.err.println("Old password is incorrect.");
-            return;
+        while (true) {
+            System.out.print("Old password (or press 'q' to quit): ");
+            String oldPassword = Validate.checkInputString();
+            if (oldPassword.equalsIgnoreCase("q")) {
+                System.out.println("Password change canceled.");
+                return;
+            }
+    
+            if (!MD5Encryption(oldPassword).equalsIgnoreCase(accountLogin.getPassword())) {
+                System.out.println("Old password is incorrect. Please try again.");
+                continue;
+            }
+    
+            while (true) {
+                System.out.print("New password: ");
+                String newPassword = Validate.checkInputString();
+                System.out.print("Confirm new password: ");
+                String confirmPassword = Validate.checkInputString();
+    
+                if (!newPassword.equals(confirmPassword)) {
+                    System.out.println("New password and confirmation do not match. Please try again.");
+                } else {
+                    accountLogin.setPassword(MD5Encryption(newPassword));
+                    System.out.println("Password changed successfully.");
+                    return;
+                }
+            }
         }
-
-        System.out.print("New password: ");
-        String newPassword = Validate.checkInputString();
-        System.out.print("Confirm new password: ");
-        String confirmPassword = Validate.checkInputString();
-
-        if (!newPassword.equals(confirmPassword)) {
-            System.err.println("New password and confirmation do not match.");
-            return;
-        }
-
-        accountLogin.setPassword(MD5Encryption(newPassword));
-        System.out.println("Password changed successfully.");
     }
-
+    
     public static void menu() {
         while (true) {
             System.out.println("1. Add user");
